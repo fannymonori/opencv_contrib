@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     sr.readModel(path);
     sr.setModel("lapsrn", scale);
 
-    sr.upsample_multioutput(img, outputs, scales, node_names);
+    sr.upsampleMultioutput(img, outputs, scales, node_names);
 
     for(unsigned int i = 0; i < outputs.size(); i++)
     {

@@ -108,13 +108,21 @@ namespace dnn_superres
              */
             void upsample(Mat img, Mat &img_new);
 
+            void upsampleTest(Mat img, Mat &img_new);
+
             /** @brief Upsample via neural network of multiple outputs
             @param img Image to upscale
             @param imgs_new Destination upscaled images
             @param scale_factors Scaling factors of the output nodes
             @param node_names Names of the output nodes in the neural network
             */
-            void upsample_multioutput(Mat img, std::vector<Mat> &imgs_new, std::vector<int> scale_factors, std::vector<String> node_names);
+            void upsampleMultioutput(Mat img, std::vector<Mat> &imgs_new, std::vector<int> scale_factors, std::vector<String> node_names);
+
+            /** @brief Upsamples videos via neural network and saves it into the given path.
+            @param inputPath Path to video to upscale
+            @param outputPath Destination upscaled video
+            */
+            void upsampleVideo(String inputPath, String outputPath);
 
             /** @brief Returns the scale factor of the model:
             @return Current scale factor.

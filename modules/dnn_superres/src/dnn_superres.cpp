@@ -73,6 +73,49 @@ namespace cv
                 this->alg = algo;
             }
 
+            void DnnSuperResImpl::upsampleTest(Mat img, Mat &img_new)
+            {
+                struct timespec start, finish;
+                double elapsed;
+
+
+                clock_gettime(CLOCK_MONOTONIC, &start);
+                //Preprocess the image: convert to YCrCb float image and normalize
+                Mat preproc_img;
+                preprocess_YCrCb(img, preproc_img);
+
+                //Split the image: only the Y channel is used for inference
+                Mat ycbcr_channels[3];
+                split(preproc_img, ycbcr_channels);
+
+                Mat Y = ycbcr_channels[0];
+
+                //Create blob from image so it has size 1,1,Width,Height
+                cv::Mat blob;
+                dnn::blobFromImage(Y, blob, 1.0);
+
+                //Get the HR output
+                this->net.setInput(blob);
+
+                Mat blob_output = this->net.forward();
+
+                //Convert from blob
+                std::vector <Mat> model_outs;
+                dnn::imagesFromBlob(blob_output, model_outs);
+                Mat out_img = model_outs[0];
+
+                //Reconstruct: upscale the Cr and Cb space and merge the three layer
+                reconstruct_YCrCb(out_img, preproc_img, img_new, this->sc);
+
+                clock_gettime(CLOCK_MONOTONIC, &finish);
+
+                elapsed = (finish.tv_sec - start.tv_sec);
+                elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+
+                //std::cout << elapsed << std::endl;
+
+            }
+
             void DnnSuperResImpl::upsample(Mat img, Mat &img_new)
             {
                 if( !net.empty() )
@@ -95,6 +138,7 @@ namespace cv
 
                         //Get the HR output
                         this->net.setInput(blob);
+
                         Mat blob_output = this->net.forward();
 
                         //Convert from blob
@@ -123,7 +167,7 @@ namespace cv
                 }
             }
 
-            void DnnSuperResImpl::upsample_multioutput(Mat img, std::vector<Mat> &imgs_new, std::vector<int> scale_factors, std::vector<String> node_names)
+            void DnnSuperResImpl::upsampleMultioutput(Mat img, std::vector<Mat> &imgs_new, std::vector<int> scale_factors, std::vector<String> node_names)
             {
                 CV_Assert(scale_factors.size() == node_names.size());
                 CV_Assert(!scale_factors.empty());
@@ -177,6 +221,48 @@ namespace cv
                 {
                     std::cout << "Model not specified. Please set model via setModel(). \n";
                 }
+            }
+
+
+            void DnnSuperResImpl::upsampleVideo(String inputPath, String outputPath)
+            {
+                VideoCapture inputVideo(inputPath);
+                int ex = static_cast<int>(inputVideo.get(CAP_PROP_FOURCC));
+                Size S = Size((int) inputVideo.get(CAP_PROP_FRAME_WIDTH),
+                              (int) inputVideo.get(CAP_PROP_FRAME_HEIGHT));
+
+                VideoWriter outputVideo;
+                outputVideo.open(outputPath, ex, inputVideo.get(CAP_PROP_FPS), S, true);
+
+                if (!inputVideo.isOpened())
+                {
+                    std::cout  << "Could not open the video." << std::endl;
+                    return;
+                }
+
+
+                for(;;)
+                {
+                    Mat frame, outputFrame;
+                    inputVideo >> frame;
+
+                    if ( frame.empty() )
+                    {
+                        break;
+                    }
+
+                    char c=(char)waitKey(25);
+                    if(c==27)
+                        break;
+
+                    upsampleTest(frame, outputFrame);
+                    outputVideo << outputFrame;
+
+                    imshow( "Frame", outputFrame );
+
+                }
+
+                inputVideo.release();
             }
 
             int DnnSuperResImpl::getScale()

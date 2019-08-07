@@ -11,7 +11,7 @@ namespace opencv_test
 
         const std::string DNN_SUPERRES_DIR = "dnn_superres";
         const std::string IMAGE_FILENAME = "butterfly.png";
-
+        const std::string VIDEO_FILENAME = "768x576.avi";
 
         /****************************************************************************************\
         *                                Test single output models                               *
@@ -166,7 +166,7 @@ namespace opencv_test
             }
 
             std::vector<Mat> outputs;
-            this->dnn_sr->upsample_multioutput(img, outputs, scales, node_names);
+            this->dnn_sr->upsampleMultioutput(img, outputs, scales, node_names);
 
             for(unsigned int i = 0; i < outputs.size(); i++)
             {
@@ -211,5 +211,55 @@ namespace opencv_test
             CV_DnnSuperResMultiOutputTest test;
             test.safe_run();
         }
+//
+//        class CV_DnnSuperResVideoTest : public cvtest::BaseTest
+//        {
+//        public:
+//            CV_DnnSuperResVideoTest();
+//
+//        protected:
+//            Ptr <DnnSuperResImpl> dnn_sr;
+//
+//            virtual void run(int);
+//
+//            void runOneModel(std::string algorithm, int scale, std::string model_filename);
+//        };
+//
+//        void CV_DnnSuperResVideoTest::runOneModel(std::string algorithm, int scale, std::string model_filename,
+//                                                        std::vector<int> scales, std::vector<String> node_names)
+//        {
+//            std::string path = std::string(ts->get_data_path()) + DNN_SUPERRES_DIR + "/" + VIDEO_FILENAME;
+//
+//            std::string pb_path = std::string(ts->get_data_path()) + DNN_SUPERRES_DIR + "/" + model_filename;
+//
+//            this->dnn_sr->readModel(pb_path);
+//
+//            this->dnn_sr->setModel(algorithm, scale);
+//
+//            sr.upsampleVideo(input_path, output_path);
+//
+//            for(unsigned int i = 0; i < outputs.size(); i++)
+//            {
+//                if( outputs[i].empty() )
+//                {
+//                    ts->printf(cvtest::TS::LOG,
+//                               "Could not perform upsampling for scale algorithm %s and scale factor %d!\n",
+//                               algorithm.c_str(), scale);
+//                    ts->set_failed_test_info(cvtest::TS::FAIL_BAD_ACCURACY);
+//                    return;
+//                }
+//
+//                int new_cols = img.cols * scales[i];
+//                int new_rows = img.rows * scales[i];
+//
+//                if ( outputs[i].cols != new_cols || outputs[i].rows != new_rows )
+//                {
+//                    ts->printf(cvtest::TS::LOG, "Dimensions are not correct for scale algorithm %s and scale factor %d!\n",
+//                               algorithm.c_str(), scale);
+//                    ts->set_failed_test_info(cvtest::TS::FAIL_BAD_ACCURACY);
+//                    return;
+//                }
+//            }
+//        }
 
 }}
