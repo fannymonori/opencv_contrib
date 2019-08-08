@@ -14,12 +14,10 @@
 This module contains functionality for upscaling an image via convolutional neural networks.
 The following four models are implemented:
 
-- EDSR
-- ESPCN
-- FSRCNN
-- LapSRN
-
-There is also functionality for simply upscaling by bilinear or bicubic interpolation.
+- EDSR <https://arxiv.org/abs/1707.02921>
+- ESPCN <https://arxiv.org/abs/1609.05158>
+- FSRCNN <https://arxiv.org/abs/1608.00367>
+- LapSRN <https://arxiv.org/abs/1710.01992>
 
 */
 

@@ -77,7 +77,7 @@ namespace cv
             {
                 if( !net.empty() )
                 {
-                    if ( this->alg == "espcn" || this->alg == "lapsrn" )
+                    if ( this->alg == "espcn" || this->alg == "lapsrn" || this->alg == "fsrcnn" )
                     {
                         //Preprocess the image: convert to YCrCb float image and normalize
                         Mat preproc_img;
@@ -106,16 +106,36 @@ namespace cv
                         //Reconstruct: upscale the Cr and Cb space and merge the three layer
                         reconstruct_YCrCb(out_img, preproc_img, img_new, this->sc);
                     }
+                    else if( this->alg == "edsr" )
+                    {
+                        //BGR mean of the Div2K dataset
+                        Scalar mean =  Scalar(103.1545782, 111.561547, 114.35629928);
+
+                        //Convert to float
+                        Mat float_img;
+                        img.convertTo(float_img, CV_32F, 1.0);
+
+                        //Create blob from image so it has size [1,3,Width,Height] and subtract dataset mean
+                        cv::Mat blob;
+                        dnn::blobFromImage(float_img, blob, 1.0, Size(), mean);
+
+                        //Get the HR output
+                        this->net.setInput(blob);
+                        Mat blob_output = this->net.forward();
+
+                        //Convert from blob
+                        std::vector <Mat> model_outs;
+                        dnn::imagesFromBlob(blob_output, model_outs);
+                        img_new = model_outs[0];
+
+                        //Post-process: add mean.
+                        img_new = img_new + Scalar(103.1545782, 111.561547, 114.35629928);
+
+                        img_new.convertTo(img_new, CV_8U);
+                    }
                     else
                     {
-                        //get blob
-                        //Mat blob = blobFromImage(img, 1.0);
-                        //std::cout << "Made a blob. \n";
-
-                        //get prediction
-                        //net.setInput(blob);
-                        //img_new = net.forward();
-                        //std::cout << "Made a Prediction. \n";
+                        //
                     }
                 }
                 else
@@ -303,10 +323,21 @@ namespace cv
                                                                 std::vector <std::vector<int>> &) const
             {
                 std::vector<int> outShape(4);
+
+                int scale;
+                if( inputs[0][1] == 4 || inputs[0][1] == 9 || inputs[0][1] == 16 ) //Only one image channel
+                {
+                    scale = static_cast<int>(sqrt(inputs[0][1]));
+                }
+                else // Three image channels
+                {
+                    scale = static_cast<int>(sqrt(inputs[0][1]/3));
+                }
+
                 outShape[0] = inputs[0][0];
-                outShape[1] = 1;
-                outShape[2] = static_cast<int>(sqrt(inputs[0][1])) * inputs[0][2];
-                outShape[3] = static_cast<int>(sqrt(inputs[0][1])) * inputs[0][3];
+                outShape[1] = static_cast<int>(inputs[0][1] / pow(scale,2));
+                outShape[2] = static_cast<int>(scale * inputs[0][2]);
+                outShape[3] = static_cast<int>(scale * inputs[0][3]);
 
                 outputs.assign(4, outShape);
 
@@ -325,29 +356,29 @@ namespace cv
                 const float *inpData = (float *) inp.data;
                 float *outData = (float *) out.data;
 
-                const int outChannels = out.size[1];
-                const int height = out.size[2];
-                const int width = out.size[3];
-
                 const int inpHeight = inp.size[2];
                 const int inpWidth = inp.size[3];
 
-                int scale = int(sqrt(inp.size[1]));
+                const int numChannels = out.size[1];
+                const int outHeight = out.size[2];
+                const int outWidth = out.size[3];
 
+                int scale = int(outHeight / inpHeight);
                 int count = 0;
-                for (int ch = 0; ch < outChannels; ch++)
+
+                for (int ch = 0; ch < numChannels; ch++)
                 {
-                    for (int y = 0; y < height; y++)
+                    for (int y = 0; y < outHeight; y++)
                     {
-                        for (int x = 0; x < width; x++)
+                        for (int x = 0; x < outWidth; x++)
                         {
                             int x_coord = static_cast<int>(floor((y / scale)));
                             int y_coord = static_cast<int>(floor((x / scale)));
-                            int c_coord = (outChannels * scale * (y % scale) + outChannels * (x % scale)) + ch;
+                            int c_coord = numChannels * scale * (y % scale) + numChannels * (x % scale) + ch;
 
                             int index = (((c_coord * inpHeight) + x_coord) * inpWidth) + y_coord;
-                            outData[count] = inpData[index];
-                            count = count + 1;
+
+                            outData[count++] = inpData[index];
                         }
                     }
                 }

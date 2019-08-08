@@ -97,9 +97,11 @@ namespace opencv_test
         {
             //x2
             runOneModel("espcn", 2, "ESPCN_x2.pb");
+            runOneModel("fsrcnn", 2, "FSRCNN_x2.pb");
 
             //x3
             runOneModel("espcn", 3, "ESPCN_x3.pb");
+            runOneModel("fsrcnn", 3, "FSRCNN_x3.pb");
 
             //x4
             runOneModel("espcn", 4, "ESPCN_x4.pb");
