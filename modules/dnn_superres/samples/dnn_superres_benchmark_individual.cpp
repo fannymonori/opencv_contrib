@@ -107,7 +107,8 @@ int main(int argc, char *argv[])
     allImages.push_back(nearest);
     allImages.push_back(lanczos);
 
-    DnnSuperResQuality::showBenchmark(cropped, allImages, "Image", cv::Size(bicubic.cols, bicubic.rows));
+    std::vector<String> titles{algorithm1, algorithm2, "bicubic", "nearest", "lanczos"};
+    DnnSuperResQuality::showBenchmark(cropped, allImages, "Image", cv::Size(bicubic.cols, bicubic.rows), titles);
 
     imwrite( algorithm1 + ".jpg", img_new1 );
     imwrite( algorithm2 + ".jpg", img_new2 );

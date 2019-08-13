@@ -28,7 +28,6 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    string fullPath = string(argv[1]);
     string path = string(argv[1]);
     string algorithm1 = string(argv[2]);
     string algorithm2 = string(argv[3]);
@@ -39,7 +38,11 @@ int main(int argc, char *argv[])
     Ptr<SR_general100> dataset = SR_general100::create();
     dataset->load(path);
 
-    int size = dataset->getTrain().size();
+    //int size = dataset->getTrain().size();
+
+    std::vector<double> psnrs;
+    std::vector<double> ssims;
+    std::vector<double> perfs;
 
     for(int i = 0; i < 5; i++)
     {
@@ -72,15 +75,14 @@ int main(int argc, char *argv[])
         sr.readModel(path1);
         sr.setModel(algorithm1, scale);
         sr.upsample(img_downscaled, img_new1);
-
-        DnnSuperResQuality::benchmark(sr, cropped, 1);
+        DnnSuperResQuality::benchmark(sr, cropped, psnrs, ssims, perfs, 1, 0);
 
         //alg2
         sr.readModel(path2);
         sr.setModel(algorithm2, scale);
         sr.upsample(img_downscaled, img_new2);
+        DnnSuperResQuality::benchmark(sr, cropped, psnrs, ssims, perfs, 1, 0);
 
-        DnnSuperResQuality::benchmark(sr, cropped, 1);
     }
 
     return 0;

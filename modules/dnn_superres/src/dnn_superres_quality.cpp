@@ -12,6 +12,28 @@ namespace cv
     {
         namespace dnn_superres
         {
+
+            int DnnSuperResQuality::fontFace = cv::FONT_HERSHEY_COMPLEX_SMALL;
+
+            double DnnSuperResQuality::fontScale = 1.0;
+
+            Scalar DnnSuperResQuality::fontColor = Scalar(255,255,255);
+
+            void DnnSuperResQuality::setFontFace(int fontface)
+            {
+                fontFace = fontface;
+            }
+
+            void DnnSuperResQuality::setFontScale(double fontscale)
+            {
+                fontScale = fontscale;
+            }
+
+            void DnnSuperResQuality::setFontColor(cv::Scalar fontcolor)
+            {
+                fontColor = fontcolor;
+            }
+
             double DnnSuperResQuality::psnr(Mat img, Mat orig)
             {
                 CV_Assert(!img.empty());
@@ -99,11 +121,21 @@ namespace cv
                 return mssim[0];
             }
 
-            void DnnSuperResQuality::benchmark(DnnSuperResImpl sr, Mat img, bool showImg)
+            void DnnSuperResQuality::benchmark(DnnSuperResImpl sr, Mat img,
+                                               std::vector<double>& psnrValues,
+                                               std::vector<double>& ssimValues,
+                                               std::vector<double>& perfValues,
+                                               bool showImg,
+                                               bool showOutput)
             {
                 CV_Assert(!img.empty());
 
-                std::cout << "Start benchmarking" << std::endl;
+                psnrValues = std::vector<double>();
+                ssimValues = std::vector<double>();
+                perfValues = std::vector<double>();
+
+                if(showOutput)
+                    std::cout << "Start benchmarking" << std::endl;
 
                 int scale = sr.getScale();
 
@@ -112,7 +144,7 @@ namespace cv
                 Mat cropped = img(Rect(0, 0, width, height));
                 Mat imgDownscaled;
 
-                cv::resize(cropped, imgDownscaled, cv::Size(), 1.0/scale, 1.0/scale);
+                resize(cropped, imgDownscaled, Size(), 1.0/scale, 1.0/scale);
 
                 timespec ts_beg, ts_end;
 
@@ -123,102 +155,159 @@ namespace cv
                 clock_gettime(CLOCK_REALTIME, &ts_end);
 
                 double elapsed = (ts_end.tv_sec - ts_beg.tv_sec) + (ts_end.tv_nsec - ts_beg.tv_nsec) / 1e9;
+                double psnr_value = psnr(imgUpscaled, cropped);
+                double ssim_value = ssim(imgUpscaled, cropped);
 
-                std::cout << sr.getAlgorithm() << ":" << std::endl;
-                std::cout << "Upsampling time: " << elapsed << std::endl;
-                std::cout << "PSNR: " << psnr(imgUpscaled, cropped) << std::endl;
-                std::cout << "SSIM: " << ssim(imgUpscaled, cropped) << std::endl;
-                std::cout << "----------------------" << std::endl;
+                psnrValues.push_back(psnr_value);
+                ssimValues.push_back(ssim_value);
+                perfValues.push_back(elapsed);
+
+                if( showOutput )
+                {
+                    std::cout << sr.getAlgorithm() << ":" << std::endl;
+                    std::cout << "Upsampling time: " << elapsed << std::endl;
+                    std::cout << "PSNR: " << psnr_value << std::endl;
+                    std::cout << "SSIM: " << ssim_value << std::endl;
+                    std::cout << "----------------------" << std::endl;
+                }
 
                 //BICUBIC
                 Mat bicubic;
                 clock_gettime(CLOCK_REALTIME, &ts_beg);
-                cv::resize(imgDownscaled, bicubic, cv::Size(), scale, scale, cv::INTER_CUBIC );
+                resize(imgDownscaled, bicubic, Size(), scale, scale, INTER_CUBIC );
                 clock_gettime(CLOCK_REALTIME, &ts_end);
 
                 elapsed = (ts_end.tv_sec - ts_beg.tv_sec) + (ts_end.tv_nsec - ts_beg.tv_nsec) / 1e9;
+                psnr_value = psnr(bicubic, cropped);
+                ssim_value = ssim(bicubic, cropped);
 
-                std::cout << "Bicubic \n" << "Upsampling time: " << elapsed << std::endl;
-                std::cout << "PSNR: " << psnr(bicubic, cropped) << std::endl;
-                std::cout << "SSIM: " << ssim(bicubic, cropped) << std::endl;
-                std::cout << "----------------------" << std::endl;
+                psnrValues.push_back(psnr_value);
+                ssimValues.push_back(ssim_value);
+                perfValues.push_back(elapsed);
+
+                if( showOutput )
+                {
+                    std::cout << "Bicubic \n" << "Upsampling time: " << elapsed << std::endl;
+                    std::cout << "PSNR: " << psnr_value << std::endl;
+                    std::cout << "SSIM: " << ssim_value << std::endl;
+                    std::cout << "----------------------" << std::endl;
+                }
 
                 //NEAREST NEIGHBOR
                 Mat nearest;
                 clock_gettime(CLOCK_REALTIME, &ts_beg);
-                cv::resize(imgDownscaled, nearest, cv::Size(), scale, scale, cv::INTER_NEAREST );
+                resize(imgDownscaled, nearest, Size(), scale, scale, INTER_NEAREST );
                 clock_gettime(CLOCK_REALTIME, &ts_end);
 
                 elapsed = (ts_end.tv_sec - ts_beg.tv_sec) + (ts_end.tv_nsec - ts_beg.tv_nsec) / 1e9;
+                psnr_value = psnr(nearest, cropped);
+                ssim_value = ssim(nearest, cropped);
 
-                std::cout << "Nearest neighbor \n" << "Upsampling time: " << elapsed << std::endl;
-                std::cout << "PSNR: " << psnr(nearest, cropped) << std::endl;
-                std::cout << "SSIM: " << ssim(nearest, cropped) << std::endl;
-                std::cout << "----------------------" << std::endl;
+                psnrValues.push_back(psnr_value);
+                ssimValues.push_back(ssim_value);
+                perfValues.push_back(elapsed);
+
+                if( showOutput )
+                {
+                    std::cout << "Nearest neighbor \n" << "Upsampling time: " << elapsed << std::endl;
+                    std::cout << "PSNR: " << psnr_value << std::endl;
+                    std::cout << "SSIM: " << ssim_value << std::endl;
+                    std::cout << "----------------------" << std::endl;
+                }
 
                 //LANCZOS
                 Mat lanczos;
                 clock_gettime(CLOCK_REALTIME, &ts_beg);
-                cv::resize(imgDownscaled, lanczos, cv::Size(), scale, scale, cv::INTER_LANCZOS4 );
+                resize(imgDownscaled, lanczos, Size(), scale, scale, INTER_LANCZOS4 );
                 clock_gettime(CLOCK_REALTIME, &ts_end);
 
                 elapsed = (ts_end.tv_sec - ts_beg.tv_sec) + (ts_end.tv_nsec - ts_beg.tv_nsec) / 1e9;
+                psnr_value = psnr(lanczos, cropped);
+                ssim_value = ssim(lanczos, cropped);
 
-                std::cout << "Lanczos \n" << "Upsampling time: " << elapsed << std::endl;
-                std::cout << "PSNR: " << psnr(lanczos, cropped) << std::endl;
-                std::cout << "SSIM: " << ssim(lanczos, cropped) << std::endl;
+                psnrValues.push_back(psnr_value);
+                ssimValues.push_back(ssim_value);
+                perfValues.push_back(elapsed);
 
-                std::cout << "-----------------------------------------------" << std::endl;
-
-                if(showImg)
+                if( showOutput )
                 {
-                    std::vector<Mat> imgs{ imgUpscaled, bicubic, nearest, lanczos };
-                    showBenchmark(cropped, imgs, "Benchmarking", cv::Size(imgUpscaled.cols, imgUpscaled.rows));
+                    std::cout << "Lanczos \n" << "Upsampling time: " << elapsed << std::endl;
+                    std::cout << "PSNR: " << psnr_value << std::endl;
+                    std::cout << "SSIM: " << ssim_value << std::endl;
+
+                    std::cout << "-----------------------------------------------" << std::endl;
                 }
 
+                if( showImg )
+                {
+                    std::vector<Mat> imgs{ imgUpscaled, bicubic, nearest, lanczos };
+                    std::vector<String> titles{ sr.getAlgorithm(), "Bicubic", "Nearest neighbor", "Lanczos" };
+                    showBenchmark(cropped, imgs, "Benchmarking", Size(imgUpscaled.cols, imgUpscaled.rows), titles, psnrValues, ssimValues, perfValues);
+                }
             }
 
-            void DnnSuperResQuality::showBenchmark(Mat orig, std::vector<Mat> images, std::string title, Size imageSize)
+            void DnnSuperResQuality::showBenchmark(Mat orig, std::vector<Mat> images, std::string title, Size imageSize,
+                                                   const std::vector<String> imageTitles,
+                                                   const std::vector<double> psnrValues,
+                                                   const std::vector<double> ssimValues,
+                                                   const std::vector<double> perfValues)
             {
                 CV_Assert(images.size() > 0);
                 CV_Assert(!orig.empty());
+
+                bool showTitles = false;
+                bool showPSNR = false;
+                bool showSSIM = false;
+                bool showPerf = false;
+
+                if( imageTitles.size() == images.size() )
+                    showTitles = true;
+
+                if( psnrValues.size() == images.size() )
+                    showPSNR = true;
+
+                if( psnrValues.size() == images.size() )
+                    showSSIM = true;
+
+                if( psnrValues.size() == images.size() )
+                    showPerf = true;
 
                 int cols, rows;
 
                 int len = images.size();
 
-                if (len <= 0)
+                if ( len <= 0  )
                 {
                     std::cout << "Function showBenchmark() supports up to 9 images" << std::endl;
                     return;
                 }
-                else if (len > 9)
+                else if ( len > 9 )
                 {
                     std::cout << "Function showBenchmark() supports up to 9 images" << std::endl;
                     return;
                 }
 
-                else if (len == 1)
+                else if ( len == 1 )
                 {
                     cols = 1;
                     rows = 1;
                 }
-                else if (len == 2)
+                else if ( len == 2 )
                 {
                     cols = 2;
                     rows = 1;
                 }
-                else if (len == 3 || len == 4)
+                else if ( len == 3 || len == 4 )
                 {
                     cols = 2;
                     rows = 2;
                 }
-                else if (len == 5 || len == 6)
+                else if ( len == 5 || len == 6 )
                 {
                     cols = 3;
                     rows = 2;
                 }
-                else if (len == 7 || len == 8 || len == 9)
+                else
                 {
                     cols = 3;
                     rows = 3;
@@ -230,46 +319,85 @@ namespace cv
                 int h_ = -1;
                 for (int i = 0; i < len; i++)
                 {
-                    Mat img = images[i];
+                    CV_Assert(!images[i].empty());
 
-                    CV_Assert(!img.empty());
-
+                    int fontStart = 15;
                     int w_ = i % cols;
                     if(i % cols == 0)
                         h_++;
 
                     Rect ROI((w_  * (10 + imageSize.width)), (h_  * (10 + imageSize.height)), imageSize.width, imageSize.height);
                     Mat tmp;
-                    resize(img, tmp, Size(ROI.width, ROI.height));
+                    resize(images[i], tmp, Size(ROI.width, ROI.height));
 
-                    ss << "PSNR: " << psnr(img, orig);
-                    cv::putText(tmp,
+                    if( showTitles )
+                    {
+                        ss << imageTitles[i];
+                        putText(tmp,
                                 ss.str(),
-                                cv::Point(5,15),
-                                cv::FONT_HERSHEY_COMPLEX_SMALL,
-                                1.0,
-                                cv::Scalar(255,255,255),
+                                Point(5,fontStart),
+                                fontFace,
+                                fontScale,
+                                fontColor,
                                 1,
                                 16);
 
-                    ss.str("");
-                    ss << "SSIM: " << ssim(img, orig);
-                    cv::putText(tmp,
+                        ss.str("");
+                        fontStart += 20;
+                    }
+
+                    if( showPSNR )
+                    {
+                        ss << "PSNR: " << psnrValues[i];
+                        putText(tmp,
                                 ss.str(),
-                                cv::Point(5,32),
-                                cv::FONT_HERSHEY_COMPLEX_SMALL,
-                                1.0,
-                                cv::Scalar(255,255,255),
+                                Point(5,fontStart),
+                                fontFace,
+                                fontScale,
+                                fontColor,
                                 1,
                                 16);
 
-                    ss.str("");
+                        ss.str("");
+                        fontStart += 20;
+                    }
+
+                    if( showSSIM )
+                    {
+                        ss << "SSIM: " << ssimValues[i];
+                        putText(tmp,
+                                ss.str(),
+                                Point(5,fontStart),
+                                fontFace,
+                                fontScale,
+                                fontColor,
+                                1,
+                                16);
+
+                        ss.str("");
+                        fontStart += 20;
+                    }
+
+                    if( showPerf )
+                    {
+                        ss << "Speed: " << perfValues[i];
+                        putText(tmp,
+                                ss.str(),
+                                Point(5,fontStart),
+                                fontFace,
+                                fontScale,
+                                fontColor,
+                                1,
+                                16);
+
+                        ss.str("");
+                    }
 
                     tmp.copyTo(fullImage(ROI));
                 }
 
-                namedWindow( title, 1 );
-                imshow( title, fullImage);
+                namedWindow(title, 1);
+                imshow(title, fullImage);
                 waitKey();
             }
         }

@@ -18,10 +18,15 @@ Super Resolution using CNNs {#tutorial_table_of_content_dnn_superres}
     *Author:* Fanny Monori
 
     How to upscale video using the 'dnn_superres' interface.
-    
+
 -   @subpage tutorial_dnn_superres_custom_model
 
-    *Authors:* Fanny Monori & Xavier Weber
+    Authors:* Fanny Monori & Xavier Weber
 
     How to use the 'dnn_superres' to upscale via a custom neural network model.
 
+-   @subpage tutorial_dnn_superres_benchmark
+
+    Authors:* Fanny Monori & Xavier Weber
+
+    Benchmarking of the algorithms.

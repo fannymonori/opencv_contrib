@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
     string output_names_str = string(argv[3]);
     std::string path = string(argv[4]);
 
+    //Parse the scaling factors
     std::stringstream ss(scales_str);
     std::vector<int> scales;
     std::string token;
@@ -36,6 +37,7 @@ int main(int argc, char *argv[])
         scales.push_back(atoi(token.c_str()));
     }
 
+    //Parse the output node names
     ss = std::stringstream(output_names_str);
     std::vector<String> node_names;
     while (std::getline(ss, token, delim)) {

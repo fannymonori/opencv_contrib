@@ -62,14 +62,21 @@ int main(int argc, char *argv[])
     sr.setModel(algorithm1, scale);
     sr.upsample(img_downscaled, img_new1);
 
-    DnnSuperResQuality::benchmark(sr, cropped, 1);
+    std::vector<double> psnrs;
+    std::vector<double> ssims;
+    std::vector<double> perfs;
+
+    DnnSuperResQuality::setFontColor(cv::Scalar(255,0,0));
+    DnnSuperResQuality::setFontScale(1.0);
+    DnnSuperResQuality::setFontFace(cv::FONT_HERSHEY_COMPLEX_SMALL);
+    DnnSuperResQuality::benchmark(sr, cropped, psnrs, ssims, perfs, 1, 1);
 
     //alg2
     sr.readModel(path2);
     sr.setModel(algorithm2, scale);
     sr.upsample(img_downscaled, img_new2);
 
-    DnnSuperResQuality::benchmark(sr, cropped, 1);
+    DnnSuperResQuality::benchmark(sr, cropped, psnrs, ssims, perfs, 1, 1);
 
     return 0;
 }
