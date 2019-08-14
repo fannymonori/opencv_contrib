@@ -44,8 +44,7 @@ Explanation
     sr.readModel(path);
     @endcode
 
-    This reads the TensorFlow model from the .pb file. Here 'path' is one of the pre-trained Tensorflow models' path file. The models can be
-    found in 'dnn_superres/models/'.
+    This reads the TensorFlow model from the .pb file. Here 'path' is one of the pre-trained Tensorflow models' path file. You can download the models from OpenCV's GitHub, in the 'dnn_superres' module.
 -#  **Set the model**
     @code{.cpp}
     sr.setModel("fsrcnn", 2);

@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 {
     // Check for valid command line arguments, print usage
     // if insufficient arguments were given.
-    if (argc < 4) {
+    if ( argc < 4 ) {
         cout << "usage:   Arg 1: image     | Path to image" << endl;
         cout << "\t Arg 2: algorithm | bilinear, bicubic, edsr, espcn, fsrcnn or lapsrn" << endl;
         cout << "\t Arg 3: scale     | 2, 3 or 4 \n";
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     // Load the image
     Mat img = cv::imread(img_path);
     Mat original_img(img);
-    if (img.empty())
+    if ( img.empty() )
     {
         std::cerr << "Couldn't load image: " << img << "\n";
         return -2;
@@ -45,25 +45,24 @@ int main(int argc, char *argv[])
 
     Mat img_new;
 
-    if(algorithm == "bilinear"){
+    if( algorithm == "bilinear" ){
         resize(img, img_new, Size(), scale, scale, 2);
     }
-    else if(algorithm == "bicubic")
+    else if( algorithm == "bicubic" )
     {
         resize(img, img_new, Size(), scale, scale, 3);
     }
-    else if(algorithm == "espcn" || algorithm == "lapsrn")
+    else if( algorithm == "edsr" || algorithm == "espcn" || algorithm == "fsrcnn" || algorithm == "lapsrn" )
     {
         sr.readModel(path);
         sr.setModel(algorithm, scale);
         sr.upsample(img, img_new);
     }
-    else{ //one of the neural networks
-        sr.setModel(algorithm, scale);
-        sr.upsample(img, img_new);
+    else{
+        std::cerr << "Algorithm not recognized. \n";
     }
 
-    if (img_new.empty())
+    if ( img_new.empty() )
     {
         std::cerr << "Upsampling failed. \n";
         return -3;

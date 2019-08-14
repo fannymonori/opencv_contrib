@@ -2,13 +2,15 @@
 
 This module contains several learning-based algorithms for upscaling an image.
 
-## Building this module
+## Usage
 
 Run the following command to build this module:
 
 ```make
 cmake -DOPENCV_EXTRA_MODULES_PATH=<opencv_contrib>/modules -Dopencv_dnn_superres=ON <opencv_source_dir>
 ```
+
+Refer to the tutorials to understand how to use this module.
 
 ## Models
 
@@ -25,7 +27,7 @@ Trained models can be downloaded from [here](https://github.com/Saafke/EDSR_Tens
 - Advantage: Highly accurate
 - Disadvantage: Slow and large filesize
 - Speed: ~12.0sec for a 256x256 image | ~49.0sec for a 512x512 image
-- Original paper: <https://arxiv.org/abs/1707.02921>
+- Original paper: [Enhanced Deep Residual Networks for Single Image Super-Resolution](https://arxiv.org/pdf/1707.02921.pdf) [1]
 
 #### ESPCN
 
@@ -38,7 +40,7 @@ Trained models can be downloaded from [here](https://github.com/fannymonori/TF-E
 - Advantage: It is tiny, and fast, and still performs well.
 - Disadvantage: Perform worse visually than newer, more robust models.
 - Speed:
-- Original paper: <https://arxiv.org/abs/1609.05158>
+- Original paper: [Real-Time Single Image and Video Super-Resolution Using an Efficient Sub-Pixel Convolutional Neural Network](<https://arxiv.org/abs/1609.05158>) [2]
 
 #### FSRCNN
 
@@ -51,7 +53,7 @@ Trained models can be downloaded from [here](https://github.com/Saafke/FSRCNN_Te
 - Disadvantage: Not state-of-the-art accuracy
 - Speed: ~0.06sec for a 256x256 image | ~0.2sec for a 512x512 image
 - Notes: FSRCNN-small has fewer parameters, thus less accurate but faster.
-- Original paper: <https://arxiv.org/abs/1608.00367>
+- Original paper: [Accelerating the Super-Resolution Convolutional Neural Network](http://mmlab.ie.cuhk.edu.hk/projects/FSRCNN.html) [3]
 
 #### LapSRN
 
@@ -64,4 +66,28 @@ Trained models can be downloaded from [here](https://github.com/fannymonori/TF-L
 - Advantage: The model can do multi-scale super-resolution with one forward pass. It can now support 2x, 4x, 8x, and [2x, 4x] and [2x, 4x, 8x] super-resolution.
 - Disadvantage: It is a slower model.
 - Speed:
-- Original paper: <https://arxiv.org/abs/1710.01992>
+- Original paper: [Deep laplacian pyramid networks for fast and accurate super-resolution](<https://arxiv.org/abs/1710.01992>) [4]
+
+### Benchmarks
+
+Comparing different algorithms. Scale x4 on monarch.png.
+
+|               | Inference time in seconds (CPU)| PSNR | SSIM |
+| ------------- |:-------------------:| ---------:|--------:|
+| ESPCN            |0.01159   | 26.5471 | 0.88116 |
+| EDSR             |3.26758     |**29.2404**  |**0.92112**  |
+| FSRCNN           | 0.01298   | 26.5646 | 0.88064 |
+| LapSRN           |0.28257    |26.7330   |0.88622  |
+| Bicubic          |0.00031 |26.0635  |0.87537  |
+| Nearest neighbor |**0.00014** |23.5628  |0.81741  |
+| Lanczos          |0.00101  |25.9115  |0.87057  |
+
+### References
+[1] Bee Lim, Sanghyun Son, Heewon Kim, Seungjun Nah, and Kyoung Mu Lee, **"Enhanced Deep Residual Networks for Single Image Super-Resolution"**, <i> 2nd NTIRE: New Trends in Image Restoration and Enhancement workshop and challenge on image super-resolution in conjunction with **CVPR 2017**. </i> [[PDF](http://openaccess.thecvf.com/content_cvpr_2017_workshops/w12/papers/Lim_Enhanced_Deep_Residual_CVPR_2017_paper.pdf)] [[arXiv](https://arxiv.org/abs/1707.02921)] [[Slide](https://cv.snu.ac.kr/research/EDSR/Presentation_v3(release).pptx)]
+
+[2] Shi, W., Caballero, J., Huszár, F., Totz, J., Aitken, A., Bishop, R., Rueckert, D. and Wang, Z., **"Real-Time Single Image and Video Super-Resolution Using an Efficient Sub-Pixel Convolutional Neural Network"**, <i>Proceedings of the IEEE conference on computer vision and pattern recognition</i> **CVPR 2016**. [[PDF](http://openaccess.thecvf.com/content_cvpr_2016/papers/Shi_Real-Time_Single_Image_CVPR_2016_paper.pdf)] [[arXiv](https://arxiv.org/abs/1609.05158)] 
+
+[3] Chao Dong, Chen Change Loy, Xiaoou Tang. **"Accelerating the Super-Resolution Convolutional Neural Network"**, <i> in Proceedings of European Conference on Computer Vision </i>**ECCV 2016**. [[PDF](http://personal.ie.cuhk.edu.hk/~ccloy/files/eccv_2016_accelerating.pdf)]
+[[arXiv](https://arxiv.org/abs/1608.00367)] [[Project Page](http://mmlab.ie.cuhk.edu.hk/projects/FSRCNN.html)]
+
+[4] Lai, W. S., Huang, J. B., Ahuja, N., and Yang, M. H., **"Deep laplacian pyramid networks for fast and accurate super-resolution"**, <i> In Proceedings of the IEEE conference on computer vision and pattern recognition </i>**CVPR 2017**. [[PDF](http://openaccess.thecvf.com/content_cvpr_2017/papers/Lai_Deep_Laplacian_Pyramid_CVPR_2017_paper.pdf)] [[arXiv](https://arxiv.org/abs/1710.01992)] [[Project Page](http://vllab.ucmerced.edu/wlai24/LapSRN/)]

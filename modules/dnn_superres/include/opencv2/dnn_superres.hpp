@@ -23,8 +23,6 @@ The following four models are implemented:
 
 namespace cv
 {
-namespace dnn
-{
 namespace dnn_superres
 {
     //! @addtogroup dnn_superres
@@ -44,7 +42,7 @@ namespace dnn_superres
 
             /** @brief Net which holds the desired neural network
              */
-            Net net;
+            dnn::Net net;
 
             std::string alg; //algorithm
 
@@ -156,7 +154,6 @@ namespace dnn_superres
             };
     };
     //! @}
-}
 }
 }
 #endif
