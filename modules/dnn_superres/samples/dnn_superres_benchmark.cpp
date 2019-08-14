@@ -6,11 +6,9 @@
 
 #include <opencv2/dnn_superres.hpp>
 #include <opencv2/dnn_superres_quality.hpp>
-#include <opencv2/datasets/sr_div2k.hpp>
 
 using namespace std;
 using namespace cv;
-using namespace dnn;
 using namespace dnn_superres;
 
 int main(int argc, char *argv[])
@@ -19,23 +17,18 @@ int main(int argc, char *argv[])
     // if insufficient arguments were given.
     if (argc < 4) {
         cout << "usage:   Arg 1: image path | Path to image" << endl;
-        cout << "\t Arg 2: algorithm 1 | bilinear, bicubic, edsr, espcn, fsrcnn or lapsrn" << endl;
-        cout << "\t Arg 3: algorithm 2 | bilinear, bicubic, edsr, espcn, fsrcnn or lapsrn" << endl;
-        cout << "\t Arg 4: path to model file 1 \n";
-        cout << "\t Arg 5: path to model file 2 \n";
-        cout << "\t Arg 6: scale     | 2, 3 ,4 or 8 \n";
+        cout << "\t Arg 2: algorithm 1 | edsr, espcn, fsrcnn or lapsrn" << endl;
+        cout << "\t Arg 3: path to model file 1 \n";
+        cout << "\t Arg 4: scale     | 2, 3 ,4 or 8 \n";
         return -1;
     }
 
-    string fullPath = string(argv[1]);
     string path = string(argv[1]);
-    string algorithm1 = string(argv[2]);
-    string algorithm2 = string(argv[3]);
-    string path1 = string(argv[4]);
-    string path2 = string(argv[5]);
-    int scale = atoi(argv[6]);
+    string algorithm = string(argv[2]);
+    string model = string(argv[3]);
+    int scale = atoi(argv[4]);
 
-    Mat img = cv::imread(fullPath);
+    Mat img = cv::imread(path);
     if (img.empty())
     {
         std::cerr << "Couldn't load image: " << img << "\n";
@@ -54,13 +47,12 @@ int main(int argc, char *argv[])
     //Make dnn super resolution instance
     DnnSuperResImpl sr;
 
-    Mat img_new1;
-    Mat img_new2;
+    Mat img_new;
 
     //alg1
-    sr.readModel(path1);
-    sr.setModel(algorithm1, scale);
-    sr.upsample(img_downscaled, img_new1);
+    sr.readModel(model);
+    sr.setModel(algorithm, scale);
+    sr.upsample(img_downscaled, img_new);
 
     std::vector<double> psnrs;
     std::vector<double> ssims;
@@ -69,13 +61,6 @@ int main(int argc, char *argv[])
     DnnSuperResQuality::setFontColor(cv::Scalar(255,0,0));
     DnnSuperResQuality::setFontScale(1.0);
     DnnSuperResQuality::setFontFace(cv::FONT_HERSHEY_COMPLEX_SMALL);
-    DnnSuperResQuality::benchmark(sr, cropped, psnrs, ssims, perfs, 1, 1);
-
-    //alg2
-    sr.readModel(path2);
-    sr.setModel(algorithm2, scale);
-    sr.upsample(img_downscaled, img_new2);
-
     DnnSuperResQuality::benchmark(sr, cropped, psnrs, ssims, perfs, 1, 1);
 
     return 0;

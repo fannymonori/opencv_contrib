@@ -34,12 +34,12 @@ Trained models can be downloaded from [here](https://github.com/Saafke/EDSR_Tens
 Trained models can be downloaded from [here](https://github.com/fannymonori/TF-ESPCN/tree/master/export).
 
 - Size of the model: ~100kb
-- This model was trained for 100 iterations with a batch size of 32
+- This model was trained for ~100 iterations with a batch size of 32
 - Link to implementation code: https://github.com/fannymonori/TF-ESPCN
 - x2, x3, x4 trained models available
-- Advantage: It is tiny, and fast, and still performs well.
+- Advantage: It is tiny and fast, and still performs well.
 - Disadvantage: Perform worse visually than newer, more robust models.
-- Speed:
+- Speed: < 0.01 sec for every scaling factor on 256x256 images on an Intel i7-9700K CPU.
 - Original paper: [Real-Time Single Image and Video Super-Resolution Using an Efficient Sub-Pixel Convolutional Neural Network](<https://arxiv.org/abs/1609.05158>) [2]
 
 #### FSRCNN
@@ -64,8 +64,8 @@ Trained models can be downloaded from [here](https://github.com/fannymonori/TF-L
 - Link to implementation code: https://github.com/fannymonori/TF-LAPSRN
 - x2, x4, x8 trained models available
 - Advantage: The model can do multi-scale super-resolution with one forward pass. It can now support 2x, 4x, 8x, and [2x, 4x] and [2x, 4x, 8x] super-resolution.
-- Disadvantage: It is a slower model.
-- Speed:
+- Disadvantage: It is slower than ESPCN and FSRCNN, and the accuracy is worse than EDSR.
+- Speed: < 0.1 sec for every scaling factor on 256x256 images on an Intel i7-9700K CPU.
 - Original paper: [Deep laplacian pyramid networks for fast and accurate super-resolution](<https://arxiv.org/abs/1710.01992>) [4]
 
 ### Benchmarks

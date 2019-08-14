@@ -2,8 +2,13 @@ Upscaling images: multi-output {#tutorial_dnn_superres_upscale_image_multi}
 ===========================
 
 In this tutorial you will learn how to use the 'dnn_superres' interface to upscale an image via a multi-output pre-trained neural network.
-Currently there is one model included that is capable of giving more output in one inference run, that is the LapSRN model. The models are capable of [2x, 4x], and [2x, 4x, 8x] upscaling.
-OpenCVs dnn module supports accessing multiple nodes in one inference, if the names of the nodes are given.
+OpenCVs dnn module supports accessing multiple nodes in one inference, if the names of the nodes are given.\
+Currently there is one model included that is capable of giving more output in one inference run, that is the LapSRN model.
+LapSRN supports multiple outputs with one forward pass. It can now support 2x, 4x, 8x, and (2x, 4x) and (2x, 4x, 8x) super-resolution.\
+The uploaded trained model files have the following output node names:
+- 2x model: NCHW_output
+- 4x model: NCHW_output_2x, NCHW_output_4x
+- 8x model: NCHW_output_2x, NCHW_output_4x, NCHW_output_8x
 
 Building
 ----
@@ -18,6 +23,14 @@ Or make sure you check the dnn_superres module in the GUI version of CMake: cmak
 
 Source Code of the sample
 -----------
+
+Run the sample code with the following command
+
+```run
+./bin/example_dnn_superres_dnn_superres_multioutput path/to/image.png 2,4 NCHW_output_2x,NCHW_output_4x \
+path/to/opencv_contrib/modules/dnn_superres/models/LapSRN_x4.pb
+```
+
 
 @includelineno dnn_superres/samples/dnn_superres_multioutput.cpp
 

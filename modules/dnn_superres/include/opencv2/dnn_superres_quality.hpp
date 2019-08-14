@@ -17,6 +17,12 @@ namespace cv
 {
     namespace dnn_superres
     {
+
+        //! @addtogroup dnn_superres
+        //! @{
+
+        /** @brief A class benchmarking the dnn based super resolution algorithms.
+         */
         class CV_EXPORTS DnnSuperResQuality
         {
             private:
@@ -44,14 +50,14 @@ namespace cv
                 */
                 static void setFontColor(cv::Scalar fontcolor);
 
-                /** @brief Returns the PSNR of two given image:
+                /** @brief Returns the PSNR of two given image.
                 @param img Upscaled image
                 @param orig Original image
                 @return PSNR value.
                 */
                 static double psnr(Mat img, Mat orig);
 
-                /** @brief Returns the SSIM of two given image:
+                /** @brief Returns the SSIM of two given image.
                 @param img Upscaled image
                 @param orig Original image
                 @return SSIM value.
@@ -83,7 +89,7 @@ namespace cv
                                         bool showImg = false,
                                         bool showOutput = false);
 
-                /** @brief Displays benchmarking for given images
+                /** @brief Displays benchmarking for given images.
                 @param orig Original image
                 @param images Upscaled images
                 @param title Title to window
@@ -99,6 +105,7 @@ namespace cv
                                         const std::vector<double> ssimValues = std::vector<double>(),
                                         const std::vector<double> perfValues = std::vector<double>());
         };
+        //! @}
     }
 }
 #endif //OPENCV_CONTRIB_DNN_SUPERRES_QUALITY_HPP

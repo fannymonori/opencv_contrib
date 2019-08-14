@@ -8,7 +8,6 @@
 
 using namespace std;
 using namespace cv;
-using namespace dnn;
 using namespace dnn_superres;
 
 int main(int argc, char *argv[])
@@ -18,8 +17,8 @@ int main(int argc, char *argv[])
     if (argc < 4) {
         cout << "usage:   Arg 1: input video path" << endl;
         cout << "\t Arg 2: output video path" << endl;
-        cout << "\t Arg 3: algorithm | bilinear, bicubic, edsr, espcn, fsrcnn or lapsrn" << endl;
-        cout << "\t Arg 4: scale     | 2, 3 or 4 \n";
+        cout << "\t Arg 3: algorithm | edsr, espcn, fsrcnn or lapsrn" << endl;
+        cout << "\t Arg 4: scale     | 2, 3, 4 or 8 \n";
         cout << "\t Arg 5: path to model file \n";
         return -1;
     }

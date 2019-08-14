@@ -9,7 +9,6 @@
 
 using namespace std;
 using namespace cv;
-using namespace dnn;
 using namespace dnn_superres;
 
 int main(int argc, char *argv[])
@@ -17,24 +16,19 @@ int main(int argc, char *argv[])
     // Check for valid command line arguments, print usage
     // if insufficient arguments were given.
     if (argc < 4) {
-        cout << "usage:   Arg 1: dataset path     | Path to dataset" << endl;
-        cout << "\t Arg 2: algorithm 1 | bilinear, bicubic, edsr, espcn, fsrcnn or lapsrn" << endl;
-        cout << "\t Arg 3: algorithm 2 | bilinear, bicubic, edsr, espcn, fsrcnn or lapsrn" << endl;
-        cout << "\t Arg 4: path to model file 1 \n";
-        cout << "\t Arg 5: path to model file 2 \n";
-        cout << "\t Arg 6: scale     | 2, 3, 4 or 8 \n";
+        cout << "usage:   Arg 1: image path  | Path to image" << endl;
+        cout << "\t Arg 2: algorithm | edsr, espcn, fsrcnn or lapsrn" << endl;
+        cout << "\t Arg 3: path to model file 2 \n";
+        cout << "\t Arg 4: scale  | 2, 3, 4 or 8 \n";
         return -1;
     }
 
-    string fullPath = string(argv[1]);
     string path = string(argv[1]);
-    string algorithm1 = string(argv[2]);
-    string algorithm2 = string(argv[3]);
-    string path1 = string(argv[4]);
-    string path2 = string(argv[5]);
-    int scale = atoi(argv[6]);
+    string algorithm = string(argv[2]);
+    string model = string(argv[3]);
+    int scale = atoi(argv[4]);
 
-    Mat img = cv::imread(fullPath);
+    Mat img = cv::imread(path);
     if (img.empty())
     {
         std::cerr << "Couldn't load image: " << img << "\n";
@@ -54,34 +48,24 @@ int main(int argc, char *argv[])
     DnnSuperResImpl sr;
 
     std::vector<Mat> allImages;
-    Mat img_new1;
-    Mat img_new2;
+    Mat img_new;
 
     //alg1
-    sr.readModel(path1);
-    sr.setModel(algorithm1, scale);
-    sr.upsample(img_downscaled, img_new1);
+    sr.readModel(model);
+    sr.setModel(algorithm, scale);
+    sr.upsample(img_downscaled, img_new);
 
-    //alg2
-    sr.readModel(path2);
-    sr.setModel(algorithm2, scale);
-    sr.upsample(img_downscaled, img_new2);
+    double ps = DnnSuperResQuality::psnr(img_new, cropped);
+    double ssim = DnnSuperResQuality::ssim(img_new, cropped);
 
-    double ps1 = DnnSuperResQuality::psnr(img_new1, cropped);
-    double ps2 = DnnSuperResQuality::psnr(img_new2, cropped);
-
-    double ssim1 = DnnSuperResQuality::ssim(img_new1, cropped);
-    double ssim2 = DnnSuperResQuality::ssim(img_new2, cropped);
-
-    if ( img_new1.empty() || img_new2.empty() )
+    if ( img_new.empty() )
     {
         std::cerr << "Upsampling failed. \n";
         return -3;
     }
     cout << "Upsampling succeeded. \n";
 
-    std::cout << algorithm1 << " | PSNR: " << ps1 << " SSIM: " << ssim1 << std::endl;
-    std::cout << algorithm2 << " | PSNR: " << ps2 << " SSIM: " << ssim2 << std::endl;
+    std::cout << algorithm << " | PSNR: " << ps << " SSIM: " << ssim << std::endl;
 
     Mat bicubic;
     cv::resize(img_downscaled, bicubic, cv::Size(), scale, scale, cv::INTER_CUBIC );
@@ -101,20 +85,13 @@ int main(int argc, char *argv[])
     double ssim_lanczos = DnnSuperResQuality::ssim(lanczos, cropped);
     std::cout << "Lanczos" << " | PSNR: " << ps_lanczos << " SSIM: " << ssim_lanczos << std::endl;
 
-    allImages.push_back(img_new1);
-    allImages.push_back(img_new2);
+    allImages.push_back(img_new);
     allImages.push_back(bicubic);
     allImages.push_back(nearest);
     allImages.push_back(lanczos);
 
-    std::vector<String> titles{algorithm1, algorithm2, "bicubic", "nearest", "lanczos"};
+    std::vector<String> titles{algorithm, "bicubic", "nearest", "lanczos"};
     DnnSuperResQuality::showBenchmark(cropped, allImages, "Image", cv::Size(bicubic.cols, bicubic.rows), titles);
-
-    imwrite( algorithm1 + ".jpg", img_new1 );
-    imwrite( algorithm2 + ".jpg", img_new2 );
-    imwrite( "bicubic.jpg", bicubic );
-    imwrite( "nearest.jpg", nearest );
-    imwrite( "lanczos.jpg", lanczos );
 
     cv::waitKey(0);
 

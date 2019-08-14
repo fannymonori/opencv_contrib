@@ -8,7 +8,6 @@
 
 using namespace std;
 using namespace cv;
-using namespace dnn;
 using namespace dnn_superres;
 
 int main(int argc, char *argv[])
