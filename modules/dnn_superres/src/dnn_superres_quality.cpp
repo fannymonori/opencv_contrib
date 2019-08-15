@@ -36,6 +36,8 @@ namespace cv
         {
             CV_Assert(!img.empty());
             CV_Assert(!orig.empty());
+            CV_Assert(img.type() == CV_8UC3);
+            CV_Assert(img.type() == orig.type());
 
             Mat img_float;
             img.convertTo(img_float, CV_32F);
@@ -55,10 +57,10 @@ namespace cv
                 rgb_sum += sum[i];
             }
 
-            double mse = rgb_sum / (double) ( 3.0 * img_float.total() );
+            double mse = rgb_sum / (double) (3.0 * img_float.total());
 
             double max = 255 * 255;
-            double psnr = 10 * log10( max / (double) mse);
+            double psnr = 10 * log10(max / (double) mse);
 
             return psnr;
         }
@@ -67,6 +69,8 @@ namespace cv
         {
             CV_Assert(!img.empty());
             CV_Assert(!orig.empty());
+            CV_Assert(img.type() == CV_8UC3);
+            CV_Assert(img.type() == orig.type());
 
             Mat ycrcb_img, ycrcb_orig;
             cvtColor(img, ycrcb_img, COLOR_BGR2YCrCb);
@@ -83,20 +87,20 @@ namespace cv
             orig_channels[0].convertTo(orig_float, CV_32F);
 
             Mat mu_img, mu_orig;
-            GaussianBlur( img_float, mu_img, Size( 11, 11 ), 0, 0 );
-            GaussianBlur( orig_float, mu_orig, Size( 11, 11 ), 0, 0 );
+            GaussianBlur( img_float, mu_img, Size(11, 1 ), 0, 0 );
+            GaussianBlur( orig_float, mu_orig, Size(11, 11), 0, 0 );
             Mat mu_mul = mu_img.mul(mu_orig);
             mu_img = mu_img.mul(mu_img);
             mu_orig = mu_orig.mul(mu_orig);
 
             Mat sigma_img, sigma_orig;
-            GaussianBlur( img_float.mul(img_float), sigma_img, Size( 11, 11 ), 0, 0 );
-            GaussianBlur( orig_float.mul(orig_float), sigma_orig, Size( 11, 11 ), 0, 0 );
+            GaussianBlur( img_float.mul(img_float), sigma_img, Size(11, 11), 0, 0 );
+            GaussianBlur( orig_float.mul(orig_float), sigma_orig, Size(11, 11), 0, 0 );
             sigma_img = sigma_img - mu_img;
             sigma_orig = sigma_orig - mu_orig;
 
             Mat sigma_mul;
-            GaussianBlur( img_float.mul(orig_float), sigma_mul, Size( 11, 11 ), 0, 0 );
+            GaussianBlur( img_float.mul(orig_float), sigma_mul, Size(11, 11), 0, 0 );
             sigma_mul = sigma_mul - mu_mul;
 
             double c1 = (0.01 * 255) * (0.01 * 255);
@@ -114,7 +118,7 @@ namespace cv
 
             Mat ssim = nominator / denominator;
 
-            Scalar mssim = mean( ssim );
+            Scalar mssim = mean(ssim);
 
             return mssim[0];
         }
@@ -253,6 +257,14 @@ namespace cv
             CV_Assert(images.size() > 0);
             CV_Assert(!orig.empty());
 
+            int len = images.size();
+
+            if ( len > 9 )
+            {
+                std::cout << "showBenchmark() supports up to 9 images" << std::endl;
+                return;
+            }
+
             bool showTitles = false;
             bool showPSNR = false;
             bool showSSIM = false;
@@ -272,20 +284,7 @@ namespace cv
 
             int cols, rows;
 
-            int len = images.size();
-
-            if ( len <= 0  )
-            {
-                std::cout << "Function showBenchmark() supports up to 9 images" << std::endl;
-                return;
-            }
-            else if ( len > 9 )
-            {
-                std::cout << "Function showBenchmark() supports up to 9 images" << std::endl;
-                return;
-            }
-
-            else if ( len == 1 )
+            if ( len == 1 )
             {
                 cols = 1;
                 rows = 1;
@@ -311,7 +310,7 @@ namespace cv
                 rows = 3;
             }
 
-            Mat fullImage = Mat::zeros(Size((cols * 10) + imageSize.width * cols, (rows * 10) + imageSize.height * rows), CV_8UC3);
+            Mat fullImage = Mat::zeros(Size((cols * 10) + imageSize.width * cols, (rows * 10) + imageSize.height * rows), images[0].type());
 
             std::stringstream ss;
             int h_ = -1;
