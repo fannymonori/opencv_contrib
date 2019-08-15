@@ -26,7 +26,7 @@ Trained models can be downloaded from [here](https://github.com/Saafke/EDSR_Tens
 - x2, x3, x4 trained models available
 - Advantage: Highly accurate
 - Disadvantage: Slow and large filesize
-- Speed: ~12.0sec for a 256x256 image | ~49.0sec for a 512x512 image
+- Speed: < 3 sec for every scaling factor on 256x256 images on an Intel i7-9700K CPU.
 - Original paper: [Enhanced Deep Residual Networks for Single Image Super-Resolution](https://arxiv.org/pdf/1707.02921.pdf) [1]
 
 #### ESPCN
@@ -51,7 +51,7 @@ Trained models can be downloaded from [here](https://github.com/Saafke/FSRCNN_Te
 - Link to implementation code: https://github.com/Saafke/FSRCNN_Tensorflow
 - Advantage: Fast, small and accurate
 - Disadvantage: Not state-of-the-art accuracy
-- Speed: ~0.06sec for a 256x256 image | ~0.2sec for a 512x512 image
+- Speed: < 0.01 sec for every scaling factor on 256x256 images on an Intel i7-9700K CPU.
 - Notes: FSRCNN-small has fewer parameters, thus less accurate but faster.
 - Original paper: [Accelerating the Super-Resolution Convolutional Neural Network](http://mmlab.ie.cuhk.edu.hk/projects/FSRCNN.html) [3]
 
